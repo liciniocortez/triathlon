@@ -44,25 +44,31 @@ def strava_token(tokens):
     return novo["access_token"]
 
 
-def calc_tss(tipo, horas, a, cfg):
-    """TSS estimado. Bike com potência: NP/FTP. Natação sem FC: ritmo vs CSS. Demais: FC vs limiar."""
+def mmss(txt):
+    m, s_ = map(int, txt.split(":"))
+    return m * 60 + s_
+
+
+def calc_tss(a, cfg):
+    """TSS no critério do TrainingPeaks: potência (bike) > ritmo (corrida/natação) > FC > estimativa."""
     lim = cfg.get("limiares", {})
-    np_ = a.get("weighted_average_watts") if a.get("device_watts") else None
-    if tipo == "bike" and np_ and lim.get("ftp"):
-        fi = np_ / lim["ftp"]
+    tipo, horas = a["type"], a["min"] / 60
+    if horas <= 0:
+        return 0
+    if tipo == "bike" and a.get("watts") and lim.get("ftp"):
+        fi = a["watts"] / lim["ftp"]
         return round(horas * fi * fi * 100)
-    fc = a.get("average_heartrate")
-    lthr = {"run": lim.get("lthr_corrida"), "bike": lim.get("lthr_bike"), "swim": lim.get("lthr_natacao")}.get(tipo)
-    if fc and lthr:
-        fi = min(fc / lthr, 1.15)
+    if tipo == "run" and a.get("km") and lim.get("ritmo_limiar_corrida"):
+        fi = min(mmss(lim["ritmo_limiar_corrida"]) / (a["min"] * 60 / a["km"]), 1.2)
         return round(horas * fi * fi * 100)
-    if tipo == "swim" and a.get("distance") and lim.get("css_100m"):
-        m, s = map(int, lim["css_100m"].split(":"))
-        css = m * 60 + s
-        ritmo = a["moving_time"] / (a["distance"] / 100)
-        fi = min(css / ritmo, 1.15)
+    if tipo == "swim" and a.get("km") and lim.get("css_100m"):
+        fi = min(mmss(lim["css_100m"]) / (a["min"] * 60 / (a["km"] * 10)), 1.2)
         return round(horas * fi ** 3 * 100)
-    padrao = {"run": .78, "bike": .7, "swim": .72, "str": .55}[tipo]
+    lthr = {"run": lim.get("lthr_corrida"), "bike": lim.get("lthr_bike")}.get(tipo) or lim.get("lthr_padrao")
+    if a.get("hr") and lthr and tipo != "str":
+        fi = min(a["hr"] / lthr, 1.15)
+        return round(horas * fi * fi * 100)
+    padrao = {"run": .75, "bike": .65, "swim": .7, "str": .55}[tipo]
     return round(horas * padrao * padrao * 100)
 
 
@@ -79,11 +85,10 @@ def normalizar_strava(a, cfg):
         "hr": round(a["average_heartrate"]) if a.get("average_heartrate") else None,
         "max_hr": round(a["max_heartrate"]) if a.get("max_heartrate") else None,
         "elev": round(a.get("total_elevation_gain") or 0),
-        "tss": calc_tss(tipo, minutos / 60, a, cfg),
         "race": a.get("workout_type") in (1, 11),
         "elapsed": a.get("elapsed_time"),
     }
-    if tipo == "bike" and a.get("average_watts"):
+    if tipo == "bike" and a.get("average_watts") and a.get("device_watts"):
         item["watts"] = round(a.get("weighted_average_watts") or a["average_watts"])
     item["kcal"] = round(a["kilojoules"]) if a.get("kilojoules") else round(minutos * 8)
     return item
@@ -414,6 +419,8 @@ def main():
         ativ = json.loads(ARQ_ATIV.read_text()) if ARQ_ATIV.exists() else []
         if "strava" not in tokens:
             avisos.append("Strava ainda não conectado.")
+    for a in ativ:  # recalcula sempre: mudar limiares no config.json vale para todo o histórico
+        a["tss"] = calc_tss(a, cfg)
     whoop = etapa("Whoop", buscar_whoop, tokens) if "whoop" in tokens else None
     garmin = etapa("Garmin", buscar_garmin, tokens, cfg) if "garmin" in tokens else None
     plano = etapa("TrainingPeaks", buscar_tp) if env("TP_ICAL_URL", False) else None

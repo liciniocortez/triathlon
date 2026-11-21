@@ -1,11 +1,12 @@
 {
   "dias_de_historico": 365,
   "limiares": {
-    "ftp": 248,
-    "lthr_corrida": 168,
-    "lthr_bike": 160,
-    "lthr_natacao": 150,
-    "css_100m": "1:55"
+    "ftp": 185,
+    "lthr_padrao": 157,
+    "lthr_corrida": 182,
+    "lthr_bike": 175,
+    "ritmo_limiar_corrida": "4:45",
+    "css_100m": "2:30"
   },
   "provas": []
 }
