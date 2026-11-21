@@ -7,6 +7,7 @@ from datetime import date, datetime, timedelta, timezone
 
 import requests
 
+import analises
 from comum import (PASTA_DADOS, STRAVA_TOKEN_URL, WHOOP_TOKEN_URL, env, ler_config, ler_tokens,
                    post_token, salvar_tokens)
 
@@ -188,7 +189,7 @@ def buscar_whoop(tokens):
     token = whoop_token(tokens)
     perfil = requests.get(f"{WHOOP_API}/user/profile/basic", headers={"Authorization": f"Bearer {token}"}, timeout=30)
     log(f"Whoop perfil: {perfil.status_code} {perfil.text[:120] if perfil.status_code != 200 else 'ok'}")
-    dias = 45
+    dias = 120
     sonos = {s["id"]: s for s in whoop_lista(token, "/activity/sleep", dias) if not s.get("nap")}
     ciclos = whoop_lista(token, "/cycle", dias)
     recs = whoop_lista(token, "/recovery", dias)
@@ -224,7 +225,7 @@ def buscar_whoop(tokens):
         r0 = recs[0]
         log(f"Whoop: recuperação mais recente criada em {r0.get('created_at')} · estado {r0.get('score_state')} · "
             f"{len(recs)} recuperações, {len(sonos)} sonos, {len(ciclos)} ciclos")
-    saida = [{"date": d, **v} for d, v in sorted(por_dia.items())][-30:]
+    saida = [{"date": d, **v} for d, v in sorted(por_dia.items())][-120:]
     for x in saida:
         x.setdefault("sleep", 0)
         x.setdefault("strain", 0)
@@ -392,7 +393,7 @@ def pmc(ativ):
         atl += (tss - atl) / 7
         dias.append({"date": d.isoformat(), "tss": tss, "ctl": round(ctl, 1), "atl": round(atl, 1)})
         d += timedelta(days=1)
-    return dias[-200:]
+    return dias[-371:]
 
 
 MESES = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"]
@@ -481,6 +482,18 @@ def main():
     if garmin is not None and lim.get("ftp") and not garmin.get("ftp"):
         garmin["ftp"] = lim["ftp"]
 
+    dias = pmc(ativ)
+    zonas = equip = None
+    if "strava" in tokens:
+        tk = etapa("Strava token", strava_token, tokens)
+        if tk:
+            zonas = etapa("Zonas de FC", analises.zonas_fc, tk, ativ, cfg, HOJE, log)
+            equip = etapa("Equipamentos", analises.equipamentos, tk)
+    zonas = zonas if zonas is not None else anterior.get("zones", [])
+    equip = equip if equip is not None else anterior.get("gear", [])
+    proj = etapa("Projeção", analises.projecao, ativ, garmin, cfg, dias, HOJE)
+    efic = etapa("Eficiência", analises.eficiencia, ativ, HOJE, padrao=[])
+
     inicio_ano = f"{HOJE.year}-01-01"
     corte = (HOJE - timedelta(days=120)).isoformat()
     publicas = [{k: v for k, v in a.items() if k not in ("elapsed",)} for a in ativ
@@ -489,7 +502,11 @@ def main():
     saida = {
         "updated": AGORA.isoformat(timespec="minutes"),
         "acts": publicas,
-        "days": pmc(ativ),
+        "days": dias,
+        "zones": zonas,
+        "gear": equip,
+        "projection": proj,
+        "efficiency": efic,
         "whoop": whoop,
         "plan": plano,
         "garmin": garmin,

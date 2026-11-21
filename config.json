@@ -55,5 +55,32 @@
       "distancias": "1,9 km · 90 km · 21,1 km",
       "meta": ""
     }
-  ]
+  ],
+  "zonas_fc": {
+    "_explicacao": "limite superior (bpm) de Z1, Z2, Z3 e Z4; acima disso é Z5. Valores do TrainingPeaks.",
+    "run": [
+      153,
+      162,
+      171,
+      181
+    ],
+    "bike": [
+      140,
+      156,
+      163,
+      174
+    ],
+    "padrao": [
+      126,
+      140,
+      146,
+      156
+    ]
+  },
+  "projecao": {
+    "_explicacao": "premissas da projeção da próxima 70.3",
+    "fi_bike": 0.8,
+    "fator_corrida": 1.18,
+    "transicoes_min": 8
+  }
 }
