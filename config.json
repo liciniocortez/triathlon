@@ -33,6 +33,19 @@
         "bike": "211º M35-39",
         "corrida": "182º M35-39"
       }
+    },
+    {
+      "nome": "98ª São Silvestre",
+      "data": "2023-12-31",
+      "categoria": "run",
+      "local": "São Paulo, SP",
+      "destaque": "15 km · 10.366º geral · 1.061º na M30-34",
+      "distancias": {
+        "corrida": 15
+      },
+      "oficial": {
+        "total": "1:47:38"
+      }
     }
   ],
   "proximas": [
