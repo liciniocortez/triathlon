@@ -234,10 +234,14 @@ def procurar(obj, chave):
 
 def buscar_garmin(tokens, cfg):
     from garminconnect import Garmin
-    g = Garmin()
-    g.login(tokens["garmin"]["garth"])
+    g = Garmin(env("GARMIN_EMAIL"), env("GARMIN_PASSWORD"))
+    g.login()
     out = {}
-    mm = g.get_max_metrics(HOJE.isoformat())
+    try:
+        mm = g.get_max_metrics(HOJE.isoformat())
+    except Exception as e:
+        avisos.append(f"Garmin VO2máx: {e}")
+        mm = {}
     gen = procurar(mm, "generic")
     cyc = procurar(mm, "cycling")
     if gen:
@@ -260,7 +264,6 @@ def buscar_garmin(tokens, cfg):
                 out["wkg"] = round(ftp / (peso / 1000 if peso > 300 else peso), 1)
     except Exception as e:
         avisos.append(f"Garmin limiar: {e}")
-    tokens["garmin"]["garth"] = g.garth.dumps()
     log(f"Garmin: {out}")
     return out
 

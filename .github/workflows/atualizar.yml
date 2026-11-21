@@ -41,6 +41,8 @@ jobs:
           WHOOP_CLIENT_ID: ${{ secrets.WHOOP_CLIENT_ID }}
           WHOOP_CLIENT_SECRET: ${{ secrets.WHOOP_CLIENT_SECRET }}
           TP_ICAL_URL: ${{ secrets.TP_ICAL_URL }}
+          GARMIN_EMAIL: ${{ secrets.GARMIN_EMAIL }}
+          GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
         run: python scripts/atualizar.py
 
       - name: Salvar dados no repositório

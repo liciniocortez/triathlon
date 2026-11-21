@@ -42,8 +42,12 @@ def whoop(codigo):
 def garmin():
     from garminconnect import Garmin
     g = Garmin(env("GARMIN_EMAIL"), env("GARMIN_PASSWORD"))
-    g.login()
-    return {"garth": g.garth.dumps()}, g.get_full_name() or ""
+    g.login()  # só testa: a atualização diária faz login com o e-mail e a senha guardados nos segredos
+    try:
+        nome = g.get_full_name() or ""
+    except Exception:
+        nome = ""
+    return {"ativo": True}, nome
 
 
 def main():
