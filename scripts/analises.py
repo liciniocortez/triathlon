@@ -251,7 +251,6 @@ def geografia(ativ, log, max_geocode=25):
     log(f"Geografia: {len(pontos)} locais, {feitos} geocodificados agora.")
     return {
         "pontos": [[*map(float, k.split(",")), n] for k, n in pontos.items()],
-        "top": top,
         "locais": len(cidades) or len(pontos),
         "paises": len({(cache.get(k) or {}).get("pais") for k in pontos if (cache.get(k) or {}).get("pais")}),
         "mais_longe_km": round(max(_dist_km(BASE, c) for c in coords)),

@@ -375,8 +375,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
   <p class="s-sub">onde o treino acontece.</p>
   <div class="geo">
     <div class="card" style="padding:0;overflow:hidden"><div id="mapa"></div></div>
-    <div><div class="card"><div class="k-lbl" style="margin-bottom:6px">Principais cidades</div><div id="geoTop"></div></div>
-      <div class="cal-stats" id="geoFatos" style="grid-template-columns:1fr 1fr;margin-top:20px"></div></div>
+    <div><div class="cal-stats" id="geoFatos" style="grid-template-columns:1fr;margin-bottom:0"></div></div>
   </div>
   <div class="note">Localização aproximada (~10 km), só do ponto de partida. Fonte: Strava · mapa © OpenStreetMap, CARTO.</div>
 </div></section>
@@ -938,7 +937,6 @@ if(!PROJ){ $('#rumo').style.display='none'; } else {
 
 /* ============ GEOGRAFIA ============ */
 if(!GEO||!GEO.pontos||!GEO.pontos.length){ $('#geografia').style.display='none'; } else {
-  $('#geoTop').innerHTML=GEO.top.map(t=>`<div class="prr" style="grid-template-columns:auto 1fr"><span class="v" style="text-align:left;color:var(--accent-2);min-width:52px">${t.n}</span><span class="l">${t.cidade}${t.estado?', '+t.estado:''}${t.pais&&t.pais!=='Brasil'?' · '+t.pais:''}</span></div>`).join('');
   $('#geoFatos').innerHTML=[['Cidades',GEO.locais],['Países',GEO.paises],['Atividades com GPS',GEO.total],['Mais longe de Imperatriz',fmtN(GEO.mais_longe_km)+'<small>km</small>']]
     .map(([l,v])=>`<div><div class="k-lbl">${l}</div><div class="k-val" style="font-size:24px">${v}</div></div>`).join('');
   const css=['https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css','https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.min.css'];
