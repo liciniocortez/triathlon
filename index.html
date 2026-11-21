@@ -206,6 +206,15 @@ svg text{font-family:var(--mono);font-size:10px;fill:var(--ink-3)}
 .fl-c{white-space:nowrap}
 .fl-c,.fl-m{font-family:var(--mono);font-size:17px;margin-top:4px;color:var(--accent-2)}.fl-c small{font-size:11px;color:var(--ink-3);margin-right:2px}.fl-m{color:var(--run)}
 .fl-b{display:block;text-align:center;margin-top:14px;padding:10px;background:var(--accent-2);color:var(--bg);font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;text-decoration:none;border-radius:2px;font-weight:500}
+/* recolher seções */
+.s-head{position:relative;cursor:pointer;user-select:none}
+.tog{margin-left:auto;align-self:center;background:none;border:1px solid var(--line-2);color:var(--ink-2);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:transform .2s,border-color .2s}
+.s-head:hover .tog{border-color:var(--accent);color:var(--ink)}
+section.s.fechada{padding:34px 0}
+section.s.fechada .wrap>*:not(.s-head){display:none}
+section.s.fechada .s-head{margin-bottom:0}
+section.s.fechada .tog{transform:rotate(-90deg)}
+.todas{display:flex;gap:8px;justify-content:flex-end;padding-top:18px}
 /* recovery */
 .rec-top{display:grid;grid-template-columns:260px 1fr;gap:20px}
 .ring{display:flex;flex-direction:column;align-items:center;justify-content:center}
@@ -290,6 +299,8 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
   </div>
   <div class="hero-kpis" id="heroKpis"></div>
 </div><div class="foto-legenda">IRONMAN 70.3 Rio de Janeiro · chegada</div></section>
+
+<div class="wrap todas"><button class="tab" id="abrirTudo">Expandir tudo</button><button class="tab" id="fecharTudo">Recolher tudo</button></div>
 
 <!-- 01 PRÓXIMAS PROVAS -->
 <section class="s" id="proximas"><div class="wrap">
@@ -1053,6 +1064,23 @@ if(!EFF||!EFF.length){ $('#eficiencia').style.display='none'; } else {
   }
 }
 
+
+/* ============ RECOLHER / EXPANDIR SEÇÕES ============ */
+{
+  let est={}; try{ est=JSON.parse(localStorage.getItem('secoesFechadas')||'{}'); }catch(e){}
+  const salvar=()=>{ try{ localStorage.setItem('secoesFechadas',JSON.stringify(est)); }catch(e){} };
+  const aplicar=(sec,fechar)=>{ sec.classList.toggle('fechada',fechar); est[sec.id]=fechar; if(!fechar) setTimeout(()=>window.dispatchEvent(new Event('resize')),60); };
+  document.querySelectorAll('section.s').forEach(sec=>{
+    const h=sec.querySelector('.s-head'); if(!h||h.querySelector('.tog')) return;
+    const b=document.createElement('button'); b.className='tog'; b.innerHTML='▾'; b.setAttribute('aria-label','Recolher ou expandir seção'); h.appendChild(b);
+    h.addEventListener('click',()=>{ aplicar(sec,!sec.classList.contains('fechada')); salvar(); });
+    if(est[sec.id]) sec.classList.add('fechada');
+  });
+  $('#abrirTudo').onclick=()=>{ document.querySelectorAll('section.s').forEach(x=>aplicar(x,false)); salvar(); };
+  $('#fecharTudo').onclick=()=>{ document.querySelectorAll('section.s').forEach(x=>aplicar(x,true)); salvar(); };
+  // link do menu abre a seção fechada
+  document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener('click',()=>{ const t=document.querySelector(a.getAttribute('href')); if(t&&t.classList.contains('fechada')){ aplicar(t,false); salvar(); } }));
+}
 } // renderAll
 
 /* ============ CARREGAMENTO DOS DADOS REAIS ============ */
