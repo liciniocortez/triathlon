@@ -198,6 +198,11 @@ def buscar_whoop(tokens):
         if strain is not None:
             item["strain"] = round(strain, 1)
         por_dia[d] = item
+    for r in sorted(recs, key=lambda x: x.get("created_at", ""))[-3:]:
+        s = sonos.get(r.get("sleep_id")) or {}
+        c = por_ciclo.get(r.get("cycle_id")) or {}
+        log(f"Whoop debug: rec criada {r.get('created_at')} | sono {s.get('start')}→{s.get('end')} tz {s.get('timezone_offset')} | "
+            f"ciclo {c.get('start')}→{c.get('end')} strain {(c.get('score') or {}).get('strain')} | rec {(r.get('score') or {}).get('recovery_score')}")
     if recs:
         r0 = recs[0]
         log(f"Whoop: recuperação mais recente criada em {r0.get('created_at')} · estado {r0.get('score_state')} · "
