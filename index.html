@@ -207,6 +207,7 @@ svg text{font-family:var(--mono);font-size:10px;fill:var(--ink-3)}
 .fl-c,.fl-m{font-family:var(--mono);font-size:17px;margin-top:4px;color:var(--accent-2)}.fl-c small{font-size:11px;color:var(--ink-3);margin-right:2px}.fl-m{color:var(--run)}
 .fl-b{display:block;text-align:center;margin-top:14px;padding:10px;background:var(--accent-2);color:var(--bg);font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;text-decoration:none;border-radius:2px;font-weight:500}
 /* recolher seções */
+.osm-escuro{filter:invert(1) hue-rotate(200deg) brightness(.75) saturate(.6)}
 .s-head{position:relative;cursor:pointer;user-select:none}
 .tog{margin-left:auto;align-self:center;background:none;border:1px solid var(--line-2);color:var(--ink-2);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:transform .2s,border-color .2s}
 .s-head:hover .tog{border-color:var(--accent);color:var(--ink)}
@@ -377,7 +378,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
     <div class="card" style="padding:0;overflow:hidden"><div id="mapa"></div></div>
     <div><div class="cal-stats" id="geoFatos" style="grid-template-columns:1fr;margin-bottom:0"></div></div>
   </div>
-  <div class="note">Localização aproximada (~10 km), só do ponto de partida. Fonte: Strava · mapa © OpenStreetMap, CARTO.</div>
+  <div class="note">Localização aproximada (~10 km), só do ponto de partida. Fonte: Strava · mapa © Esri, OpenStreetMap.</div>
 </div></section>
 
 <!-- 04 PLANO -->
@@ -946,7 +947,11 @@ if(!GEO||!GEO.pontos||!GEO.pontos.length){ $('#geografia').style.display='none';
     .then(()=>carregar('https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js'))
     .then(()=>{
       const m=L.map('mapa',{zoomControl:true,scrollWheelZoom:false,attributionControl:true});
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap · © CARTO',subdomains:'abcd',maxZoom:12}).addTo(m);
+      const esri='https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/';
+      const base=L.tileLayer(esri+'World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',{attribution:'Mapa © Esri, OpenStreetMap',maxZoom:12}).addTo(m);
+      const rotulos=L.tileLayer(esri+'World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}',{maxZoom:12}).addTo(m);
+      let erros=0; base.on('tileerror',()=>{ if(++erros===3){ m.removeLayer(base); m.removeLayer(rotulos);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:12,className:'osm-escuro'}).addTo(m); } });
       const bolha=n=>{const s=Math.round(22+Math.min(46,Math.sqrt(n)*3.2));return L.divIcon({className:'',iconSize:[s,s],html:`<div class="bolha" style="width:${s}px;height:${s}px">${n}</div>`});};
       const grupo=L.markerClusterGroup({showCoverageOnHover:false,maxClusterRadius:50,iconCreateFunction:c=>bolha(c.getAllChildMarkers().reduce((s,x)=>s+x.options.n,0))});
       GEO.pontos.forEach(([la,lo,n])=>grupo.addLayer(L.marker([la,lo],{icon:bolha(n),n})));
