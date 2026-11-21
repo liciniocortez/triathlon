@@ -106,6 +106,15 @@ section.s{padding:88px 0;border-bottom:1px solid var(--line)}
 .side dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);padding-top:14px}
 .side dd{padding:4px 0 14px;border-bottom:1px solid var(--line);color:var(--ink-2)}
 .draft{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--run);border:1px dashed var(--run);padding:3px 8px;margin-bottom:22px}
+
+/* recordes */
+.prs{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.prc h3{font-family:var(--mono);font-weight:500;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.prc h3 i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.prr{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:12px 0;border-top:1px solid var(--line)}
+.prr .l{font-size:14px}
+.prr .v{font-family:var(--mono);font-size:20px;text-align:right}
+.prr .s{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);grid-column:1/-1;display:flex;justify-content:space-between}
 /* races */
 .races{display:grid;grid-template-columns:380px 1fr;gap:20px}
 table.rt{width:100%;border-collapse:collapse}
@@ -197,7 +206,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
   .nav{display:none}
   .hero-kpis{grid-template-columns:1fr 1fr}
   .hero-kpis>div:nth-child(3){border-left:none;padding-left:0}
-  .next,.foreword,.races,.rec-top,.acts-layout,.grid2{grid-template-columns:1fr}
+  .prs,.next,.foreword,.races,.rec-top,.acts-layout,.grid2{grid-template-columns:1fr}
   .foreword{gap:32px}
   .splits{grid-template-columns:repeat(3,1fr)}
   .splits>div{padding-bottom:12px}
@@ -217,7 +226,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
 <header class="top"><div class="wrap">
   <div class="brand"><b>Licinio Cortez</b> · Triathlon</div>
   <nav class="nav">
-    <a href="#proximas">Próximas</a><a href="#provas">Provas</a><a href="#estatisticas">Estatísticas</a><a href="#plano">Plano</a>
+    <a href="#proximas">Próximas</a><a href="#provas">Provas</a><a href="#recordes">Recordes</a><a href="#estatisticas">Estatísticas</a><a href="#plano">Plano</a>
     <a href="#carga">Carga</a><a href="#recuperacao">Recuperação</a><a href="#atividades">Atividades</a>
   </nav>
 </div></header>
@@ -252,9 +261,17 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
   </div>
 </div></section>
 
-<!-- 03 ESTATÍSTICAS -->
+<!-- 03 RECORDES -->
+<section class="s" id="recordes"><div class="wrap">
+  <div class="s-head"><span class="s-num">03</span><h2 class="s-title">Recordes pessoais</h2></div>
+  <p class="s-sub">o melhor que o relógio já registrou.</p>
+  <div class="prs" id="prList"></div>
+  <div class="note">Fonte: Garmin Connect · atualizado diariamente</div>
+</div></section>
+
+<!-- 04 ESTATÍSTICAS -->
 <section class="s" id="estatisticas"><div class="wrap">
-  <div class="s-head"><span class="s-num">03</span><h2 class="s-title">Estatísticas</h2></div>
+  <div class="s-head"><span class="s-num">04</span><h2 class="s-title">Estatísticas</h2></div>
   <p class="s-sub">medido, não estimado.</p>
   <div class="tabs" id="statTabs"></div>
   <div class="grid4" id="statKpis"></div>
@@ -267,7 +284,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
 
 <!-- 04 PLANO -->
 <section class="s" id="plano"><div class="wrap">
-  <div class="s-head"><span class="s-num">04</span><h2 class="s-title">Planejado × realizado</h2></div>
+  <div class="s-head"><span class="s-num">05</span><h2 class="s-title">Planejado × realizado</h2></div>
   <p class="s-sub">o que o treinador prescreveu, e o que de fato aconteceu.</p>
   <div class="plan-k" id="planK"></div>
   <div class="card">
@@ -283,7 +300,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
 
 <!-- 05 CARGA -->
 <section class="s" id="carga"><div class="wrap">
-  <div class="s-head"><span class="s-num">05</span><h2 class="s-title">Carga de treino</h2></div>
+  <div class="s-head"><span class="s-num">06</span><h2 class="s-title">Carga de treino</h2></div>
   <p class="s-sub">forma, fadiga e condicionamento. modelo de impulso-resposta.</p>
   <div class="pmc-k" id="pmcK"></div>
   <div class="card">
@@ -300,7 +317,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
 
 <!-- 05 RECUPERAÇÃO -->
 <section class="s" id="recuperacao"><div class="wrap">
-  <div class="s-head"><span class="s-num">06</span><h2 class="s-title">Recuperação</h2></div>
+  <div class="s-head"><span class="s-num">07</span><h2 class="s-title">Recuperação</h2></div>
   <p class="s-sub">sinais vitais de quem treina. sem filtro.</p>
   <div class="rec-top">
     <div class="card ring" id="ring"></div>
@@ -319,7 +336,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
 
 <!-- 06 ATIVIDADES -->
 <section class="s" id="atividades"><div class="wrap">
-  <div class="s-head"><span class="s-num">07</span><h2 class="s-title">Atividades recentes</h2></div>
+  <div class="s-head"><span class="s-num">08</span><h2 class="s-title">Atividades recentes</h2></div>
   <p class="s-sub">tudo que foi feito. inclusive os dias ruins.</p>
   <div class="tabs" id="actTabs"></div>
   <div class="acts-layout">
@@ -465,6 +482,29 @@ if(!IS_SAMPLE){ $('#footNote').textContent='Dados: Strava · Garmin · Whoop · 
       <div class="bar"><i style="width:${pct}%"></i></div>
       <div class="mt"><span class="l">Meta</span>${p.meta?`<span class="v">${p.meta}</span>`:'<span class="v tbd">a definir</span>'}</div></div>`;
   }).join('') || '<div class="rest">Nenhuma prova agendada.</div>';
+}
+
+/* ============ RECORDES ============ */
+{
+  const PR={run:[[1,'1 km','t',1],[2,'1 milha','t',1.609],[3,'5 km','t',5],[4,'10 km','t',10],[5,'Meia maratona','t',21.0975],[6,'Maratona','t',42.195],[7,'Maior distância','d']],
+    bike:[[11,'40 km','t',40],[10,'Potência 20 min','w'],[8,'Maior distância','d'],[9,'Maior ganho de elevação','m']],
+    swim:[[18,'100 m','t',.1],[20,'400 m','t',.4],[22,'750 m','t',.75],[23,'1.000 m','t',1],[25,'1.500 m','t',1.5],[26,'2.000 m','t',2],[17,'Maior distância','d']]};
+  const hms=s=>{s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return h?`${h}:${String(m).padStart(2,'0')}:${String(x).padStart(2,'0')}`:`${m}:${String(x).padStart(2,'0')}`;};
+  const prs=(GARMIN&&GARMIN.prs)||[]; const by={}; prs.forEach(r=>by[r.typeId]=r);
+  const html=Object.entries(PR).map(([sp,rows])=>{
+    const itens=rows.filter(r=>by[r[0]]).map(([id,lb,tp,km])=>{
+      const r=by[id], v=r.value; let val='',sub='';
+      if(tp==='t'){ val=hms(v);
+        sub= sp==='run'? hms(v/km)+' /km' : sp==='swim'? hms(v/(km*10))+' /100m' : fmtN(km/(v/3600),1)+' km/h'; }
+      else if(tp==='d'){ val= sp==='swim'? fmtN(v)+' m' : fmtN(v/1000,1)+' km'; }
+      else if(tp==='w'){ val=Math.round(v)+' W'; sub=fmtN(v/((GARMIN&&GARMIN.ftp)||185)*100)+"% do FTP"; }
+      else if(tp==='m'){ val=fmtN(v)+' m'; }
+      const dt=(r.prStartTimeGmtFormatted||'').slice(0,10).split('-').reverse().join('/');
+      return `<div class="prr"><span class="l">${lb}</span><span class="v">${val}</span><span class="s"><span>${sub}</span><span title="${(r.activityName||'').replace(/"/g,'')}">${dt}</span></span></div>`;
+    }).join('');
+    return itens?`<div class="card prc"><h3><i style="background:${SPORT[sp].hex}"></i>${SPORT[sp].n}</h3>${itens}</div>`:'';
+  }).join('');
+  if(html) $('#prList').innerHTML=html; else $('#recordes').style.display='none';
 }
 /* ============ 02 PROVAS ============ */
 let RACES = [
