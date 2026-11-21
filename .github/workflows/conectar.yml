@@ -1,0 +1,57 @@
+name: Conectar conta
+
+on:
+  workflow_dispatch:
+    inputs:
+      servico:
+        description: "Serviço"
+        type: choice
+        options: [strava, whoop, garmin]
+        required: true
+      codigo:
+        description: "Código da página conectar.html (vazio para Garmin)"
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dados
+  cancel-in-progress: false
+
+jobs:
+  conectar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ocultar o código nos registros
+        run: |
+          CODIGO=$(jq -r '.inputs.codigo // ""' "$GITHUB_EVENT_PATH")
+          [ -n "$CODIGO" ] && echo "::add-mask::$CODIGO" || true
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r scripts/requirements.txt
+
+      - name: Trocar código por autorização
+        env:
+          TOKEN_KEY: ${{ secrets.TOKEN_KEY }}
+          STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
+          STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
+          WHOOP_CLIENT_ID: ${{ secrets.WHOOP_CLIENT_ID }}
+          WHOOP_CLIENT_SECRET: ${{ secrets.WHOOP_CLIENT_SECRET }}
+          GARMIN_EMAIL: ${{ secrets.GARMIN_EMAIL }}
+          GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
+          SERVICO: ${{ inputs.servico }}
+        run: python scripts/conectar.py "$SERVICO" "$(jq -r '.inputs.codigo // ""' "$GITHUB_EVENT_PATH")"
+
+      - name: Salvar autorização (criptografada)
+        run: |
+          git config user.name "painel-bot"
+          git config user.email "painel-bot@users.noreply.github.com"
+          git add tokens.enc
+          git commit -m "Conta conectada: ${{ inputs.servico }}"
+          git push

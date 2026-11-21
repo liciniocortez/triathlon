@@ -1,0 +1,66 @@
+name: Atualizar dados e publicar site
+
+on:
+  schedule:
+    - cron: "0 9 * * *"      # 06:00 em Imperatriz (UTC-3)
+  workflow_dispatch:          # botão "Run workflow" para atualizar na hora
+  push:
+    branches: [main]
+    paths-ignore: ["data/**", "tokens.enc"]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: dados
+  cancel-in-progress: false
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependências
+        run: pip install -r scripts/requirements.txt
+
+      - name: Buscar Strava, Whoop, Garmin e TrainingPeaks
+        env:
+          TOKEN_KEY: ${{ secrets.TOKEN_KEY }}
+          STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
+          STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
+          WHOOP_CLIENT_ID: ${{ secrets.WHOOP_CLIENT_ID }}
+          WHOOP_CLIENT_SECRET: ${{ secrets.WHOOP_CLIENT_SECRET }}
+          TP_ICAL_URL: ${{ secrets.TP_ICAL_URL }}
+        run: python scripts/atualizar.py
+
+      - name: Salvar dados no repositório
+        run: |
+          git config user.name "painel-bot"
+          git config user.email "painel-bot@users.noreply.github.com"
+          git add data tokens.enc
+          git diff --cached --quiet || git commit -m "Dados atualizados $(date -u +%F)"
+          git push
+
+      - name: Preparar site
+        run: |
+          mkdir _site
+          cp index.html conectar.html _site/
+          cp -r data _site/data
+          rm -f _site/data/atividades.json
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deploy
+        uses: actions/deploy-pages@v4

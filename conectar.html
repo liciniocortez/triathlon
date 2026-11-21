@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Conectar contas · Painel</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0B1730;--panel:#13264B;--line:#1B3266;--accent:#4A79B5;--ink:#E9EEF6;--ink2:#A8B6CC;--ink3:#6F7F9A;--good:#3FBF8A}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;padding:48px 20px;line-height:1.55}
+main{max-width:620px;margin:0 auto}
+h1{font-family:'Instrument Serif',serif;font-weight:400;font-size:44px;margin-bottom:6px}
+p{color:var(--ink2);margin:8px 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:22px;margin-top:22px}
+label{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);display:block;margin-bottom:6px}
+input{width:100%;background:#0B1730;border:1px solid var(--line);color:var(--ink);padding:11px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:14px}
+button{margin-top:12px;background:var(--ink);color:var(--bg);border:none;padding:11px 16px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.code{font-family:'JetBrains Mono',monospace;font-size:15px;background:#0B1730;border:1px solid var(--accent);padding:14px;border-radius:3px;word-break:break-all;margin:12px 0}
+ol{color:var(--ink2);padding-left:20px}
+li{margin:6px 0}
+a{color:#8FB3E0}
+.ok{color:var(--good)}
+.mono{font-family:'JetBrains Mono',monospace;font-size:13px}
+</style>
+</head>
+<body><main id="app"></main>
+<script>
+const base = location.origin + location.pathname;               // .../conectar.html
+const dono = location.hostname.split('.')[0];
+const repo = location.pathname.split('/').filter(Boolean)[0] || '';
+const actions = `https://github.com/${dono}/${repo}/actions/workflows/conectar.yml`;
+const q = new URLSearchParams(location.search);
+const app = document.getElementById('app');
+
+if (q.get('code')) {
+  const svc = (q.get('state') || '').startsWith('whoop') ? 'whoop' : 'strava';
+  const code = q.get('code');
+  app.innerHTML = `
+    <h1>Quase lá</h1>
+    <p class="ok">Autorização do ${svc === 'whoop' ? 'Whoop' : 'Strava'} recebida.</p>
+    <div class="card">
+      <label>Código (vale por poucos minutos)</label>
+      <div class="code" id="c">${code}</div>
+      <button id="cp">Copiar código</button>
+      <ol style="margin-top:18px">
+        <li>Abra <a href="${actions}">Actions › Conectar conta</a></li>
+        <li>Clique em <b>Run workflow</b></li>
+        <li>Em <b>serviço</b>, escolha <span class="mono">${svc}</span></li>
+        <li>Em <b>código</b>, cole o código acima e clique no botão verde <b>Run workflow</b></li>
+      </ol>
+    </div>`;
+  document.getElementById('cp').onclick = async e => {
+    try { await navigator.clipboard.writeText(code); e.target.textContent = 'Copiado'; } catch { e.target.textContent = 'Selecione e copie manualmente'; }
+  };
+} else if (q.get('error')) {
+  app.innerHTML = `<h1>Autorização recusada</h1><p>${q.get('error')}</p><p><a href="${base}">Tentar de novo</a></p>`;
+} else {
+  app.innerHTML = `
+    <h1>Conectar contas</h1>
+    <p>Feito uma vez só. Depois a atualização diária usa a autorização salva.</p>
+    <div class="card">
+      <label>Strava · Client ID</label>
+      <input id="sid" inputmode="numeric" placeholder="ex.: 123456">
+      <button id="sb">Autorizar Strava</button>
+      <p class="mono" style="margin-top:12px">No app do Strava, o campo "Authorization Callback Domain" deve ser: <b>${location.hostname}</b></p>
+    </div>
+    <div class="card">
+      <label>Whoop · Client ID</label>
+      <input id="wid" placeholder="ex.: 1a2b3c4d-...">
+      <button id="wb">Autorizar Whoop</button>
+      <p class="mono" style="margin-top:12px">No app do Whoop, o "Redirect URL" deve ser:<br><b>${base}</b></p>
+    </div>
+    <div class="card">
+      <label>Garmin</label>
+      <p>Não precisa autorizar aqui. Em <a href="${actions}">Actions › Conectar conta</a>, rode com o serviço <span class="mono">garmin</span> (o campo código fica vazio).</p>
+    </div>`;
+  document.getElementById('sb').onclick = () => {
+    const id = document.getElementById('sid').value.trim(); if (!id) return;
+    location.href = 'https://www.strava.com/oauth/authorize?' + new URLSearchParams({
+      client_id: id, response_type: 'code', redirect_uri: base, approval_prompt: 'force',
+      scope: 'read,activity:read_all', state: 'strava-conectar' });
+  };
+  document.getElementById('wb').onclick = () => {
+    const id = document.getElementById('wid').value.trim(); if (!id) return;
+    location.href = 'https://api.prod.whoop.com/oauth/oauth2/auth?' + new URLSearchParams({
+      client_id: id, response_type: 'code', redirect_uri: base,
+      scope: 'offline read:recovery read:cycles read:sleep read:workout read:profile', state: 'whoop-conectar' });
+  };
+}
+</script>
+</body>
+</html>
