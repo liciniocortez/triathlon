@@ -8,5 +8,31 @@
     "ritmo_limiar_corrida": "4:45",
     "css_100m": "2:30"
   },
-  "provas": []
+  "provas": [],
+  "proximas": [
+    {
+      "nome": "IRONMAN 70.3 Brasília",
+      "data": "2027-04-18",
+      "local": "Brasília, DF",
+      "tipo": "tri",
+      "distancias": "1,9 km · 90 km · 21,1 km",
+      "meta": "sub-6:00"
+    },
+    {
+      "nome": "Maratona do Rio",
+      "data": "2027-05-30",
+      "local": "Rio de Janeiro, RJ",
+      "tipo": "run",
+      "distancias": "42,195 km",
+      "meta": ""
+    },
+    {
+      "nome": "IRONMAN 70.3 São Paulo",
+      "data": "2027-09-19",
+      "local": "São Paulo, SP",
+      "tipo": "tri",
+      "distancias": "1,9 km · 90 km · 21,1 km",
+      "meta": ""
+    }
+  ]
 }

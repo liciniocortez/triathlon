@@ -469,6 +469,7 @@ def main():
         "plan": plano,
         "garmin": garmin,
         "races": montar_provas(ativ, cfg),
+        "next": cfg.get("proximas", []),
         "warnings": avisos,
     }
     PASTA_DADOS.mkdir(exist_ok=True)
