@@ -194,3 +194,66 @@ def equipamentos(token):
                           "km": round((g.get("distance") or 0) / 1000),
                           "primary": bool(g.get("primary")), "retired": bool(g.get("retired"))})
     return itens
+
+
+# ---------------------------------------------------------------- geografia
+ARQ_LUGARES = PASTA_DADOS / "lugares.json"
+BASE = (-5.53, -47.48)  # Imperatriz
+
+
+def _dist_km(a, b):
+    from math import asin, cos, radians, sin, sqrt
+    la1, lo1, la2, lo2 = map(radians, (a[0], a[1], b[0], b[1]))
+    h = sin((la2 - la1) / 2) ** 2 + cos(la1) * cos(la2) * sin((lo2 - lo1) / 2) ** 2
+    return 6371 * 2 * asin(sqrt(h))
+
+
+def geografia(ativ, log, max_geocode=25):
+    import time
+    pontos = {}
+    for a in ativ:
+        ll = a.get("latlng")
+        if ll:
+            k = f"{ll[0]:.1f},{ll[1]:.1f}"
+            pontos[k] = pontos.get(k, 0) + 1
+    if not pontos:
+        return None
+    cache = json.loads(ARQ_LUGARES.read_text()) if ARQ_LUGARES.exists() else {}
+    feitos = 0
+    for k, _ in sorted(pontos.items(), key=lambda x: -x[1]):
+        if k in cache or feitos >= max_geocode:
+            continue
+        lat, lng = k.split(",")
+        try:
+            r = requests.get("https://nominatim.openstreetmap.org/reverse",
+                             params={"lat": lat, "lon": lng, "format": "json", "zoom": 10, "accept-language": "pt-BR"},
+                             headers={"User-Agent": "painel-triathlon-liciniocortez/1.0 (github.com/liciniocortez/triathlon)"},
+                             timeout=20)
+            ad = r.json().get("address", {}) if r.status_code == 200 else {}
+            cache[k] = {"cidade": ad.get("city") or ad.get("town") or ad.get("municipality") or ad.get("village") or ad.get("county") or "",
+                        "estado": ad.get("state", ""), "pais": ad.get("country", ""), "cc": (ad.get("country_code") or "").upper()}
+        except Exception:
+            cache[k] = {"cidade": "", "estado": "", "pais": "", "cc": ""}
+        feitos += 1
+        time.sleep(1.1)  # política de uso do Nominatim
+    ARQ_LUGARES.write_text(json.dumps(cache, ensure_ascii=False))
+    # agrega por cidade
+    cidades = {}
+    for k, n in pontos.items():
+        c = cache.get(k) or {}
+        nome = c.get("cidade") or ""
+        if not nome:
+            continue
+        chave = (nome, c.get("estado", ""), c.get("pais", ""))
+        cidades[chave] = cidades.get(chave, 0) + n
+    top = [{"cidade": c[0], "estado": c[1], "pais": c[2], "n": n} for c, n in sorted(cidades.items(), key=lambda x: -x[1])[:5]]
+    coords = [tuple(map(float, k.split(","))) for k in pontos]
+    log(f"Geografia: {len(pontos)} locais, {feitos} geocodificados agora.")
+    return {
+        "pontos": [[*map(float, k.split(",")), n] for k, n in pontos.items()],
+        "top": top,
+        "locais": len(cidades) or len(pontos),
+        "paises": len({(cache.get(k) or {}).get("pais") for k in pontos if (cache.get(k) or {}).get("pais")}),
+        "mais_longe_km": round(max(_dist_km(BASE, c) for c in coords)),
+        "total": sum(pontos.values()),
+    }

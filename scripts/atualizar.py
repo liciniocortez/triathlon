@@ -89,6 +89,8 @@ def normalizar_strava(a, cfg):
         "race": a.get("workout_type") in (1, 11),
         "elapsed": a.get("elapsed_time"),
     }
+    ll = a.get("start_latlng")
+    item["latlng"] = [round(ll[0], 1), round(ll[1], 1)] if ll and len(ll) == 2 else None  # ~10 km: nível de cidade
     if tipo == "bike" and a.get("average_watts") and a.get("device_watts"):
         item["watts"] = round(a.get("weighted_average_watts") or a["average_watts"])
     item["kcal"] = round(a["kilojoules"]) if a.get("kilojoules") else round(minutos * 8)
@@ -115,6 +117,8 @@ def deduplicar(ativ):
 def buscar_strava(tokens, cfg):
     antigas = json.loads(ARQ_ATIV.read_text()) if ARQ_ATIV.exists() else []
     por_id = {a["id"]: a for a in antigas}
+    if antigas and any("latlng" not in a for a in antigas):
+        antigas = []  # rebusca completa uma vez para incluir a localização
     if antigas:
         ultimo = max(datetime.fromisoformat(a["date"]) for a in antigas)
         depois = ultimo.replace(tzinfo=BRT) - timedelta(days=5)
@@ -493,10 +497,11 @@ def main():
     equip = equip if equip is not None else anterior.get("gear", [])
     proj = etapa("Projeção", analises.projecao, ativ, garmin, cfg, dias, HOJE)
     efic = etapa("Eficiência", analises.eficiencia, ativ, HOJE, padrao=[])
+    geo = etapa("Geografia", analises.geografia, ativ, log)
 
     inicio_ano = f"{HOJE.year}-01-01"
     corte = (HOJE - timedelta(days=120)).isoformat()
-    publicas = [{k: v for k, v in a.items() if k not in ("elapsed",)} for a in ativ
+    publicas = [{k: v for k, v in a.items() if k not in ("elapsed", "latlng")} for a in ativ
                 if a["date"] >= min(inicio_ano, corte)]
 
     saida = {
@@ -507,6 +512,7 @@ def main():
         "gear": equip,
         "projection": proj,
         "efficiency": efic,
+        "geo": geo if geo is not None else anterior.get("geo"),
         "whoop": whoop,
         "plan": plano,
         "garmin": garmin,
