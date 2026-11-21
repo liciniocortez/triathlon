@@ -523,13 +523,13 @@ function renderRaces(){
   if(!r){ $('#raceDetail').innerHTML='<div class="rest">Nenhuma prova registrada nesta categoria.</div>'; return; }
   let body='';
   if(r.splits){
-    const toS=t=>t.split(':').reduce((s,x)=>s*60+ +x,0);
+    const toS=t=>(t&&/^[\d:]+$/.test(t))?t.split(':').reduce((s,x)=>s*60+ +x,0):0;
     const parts=[['swim','Natação',r.splits.swim],['t1','T1',[null,r.splits.t1]],['bike','Bike',r.splits.bike],['t2','T2',[null,r.splits.t2]],['run','Corrida',r.splits.run]];
-    const tot=parts.reduce((s,p)=>s+toS(p[2][1]),0);
+    const tot=parts.reduce((s,p)=>s+toS(p[2][1]),0)||1;
     const col={swim:'var(--swim)',bike:'var(--bike)',run:'var(--run)',t1:'var(--str)',t2:'var(--str)'};
-    body=`<div class="splitbar">${parts.map(p=>`<div style="flex:${toS(p[2][1])/tot};background:${col[p[0]]}"></div>`).join('')}</div>
+    body=`${tot>1?`<div class="splitbar">${parts.map(p=>`<div style="flex:${toS(p[2][1])/tot};background:${col[p[0]]}"></div>`).join('')}</div>`:'<div style="height:26px"></div>'}
     <div class="k-lbl">Parciais oficiais</div>
-    <div class="splits">${parts.map(p=>`<div><div class="lb"><i style="background:${col[p[0]]}"></i>${p[1]}${p[2][0]?' '+fmtN(p[2][0],p[2][0]<2?1:0)+'k':''}</div><div class="v">${p[2][1]}</div></div>`).join('')}
+    <div class="splits">${parts.map(p=>`<div><div class="lb"><i style="background:${col[p[0]]}"></i>${p[1]}${p[2][0]?' '+fmtN(p[2][0],p[2][0]<2?1:0)+'k':''}</div><div class="v">${p[2][1]||'—'}</div></div>`).join('')}
       <div><div class="lb">Total</div><div class="v" style="color:var(--accent-2)">${r.total}</div></div></div>`;
   } else {
     body=`<div class="splitbar"><div style="flex:1;background:var(--run)"></div></div><div class="splits" style="grid-template-columns:repeat(2,1fr)"><div><div class="lb">Distância</div><div class="v">${fmtN(r.run[0],1)} km</div></div><div><div class="lb">Tempo oficial</div><div class="v" style="color:var(--accent-2)">${r.total}</div></div></div>`;
@@ -722,7 +722,7 @@ async function boot(){
       acts=D.acts.map(a=>({...a,date:P(a.date)})).sort((a,b)=>b.date-a.date);
       days=D.days.map(x=>({...x,dt:P(x.date)}));
       whoop=(D.whoop||[]).map(x=>({...x,dt:P(x.date)}));
-      if(D.races&&D.races.length) RACES=D.races;
+      RACES=D.races||[];
       PLANLIST=D.plan||[]; GARMIN=D.garmin||null; IS_SAMPLE=false; if(D.next&&D.next.length) NEXT=D.next;
     }
   }catch(e){ console.log('Usando dados de exemplo', e); }

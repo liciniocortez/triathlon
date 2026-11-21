@@ -94,6 +94,23 @@ def normalizar_strava(a, cfg):
     return item
 
 
+def deduplicar(ativ):
+    """Mesmo treino gravado por dois aparelhos (ex.: Garmin + Whoop): mesmo tipo, início até 10 min de diferença."""
+    def nota(a):  # prefere o registro mais completo
+        return (a.get("hr") is not None) + (a.get("watts") is not None) + (a.get("km") or 0) / 1000 + a["min"] / 1e4
+    ficam = []
+    for a in sorted(ativ, key=nota, reverse=True):
+        t = datetime.fromisoformat(a["date"])
+        dup = any(b["type"] == a["type"] and abs((datetime.fromisoformat(b["date"]) - t).total_seconds()) <= 600
+                  and abs((b.get("km") or 0) - (a.get("km") or 0)) <= max(1.5, 0.1 * (a.get("km") or 0))
+                  for b in ficam)
+        if not dup:
+            ficam.append(a)
+    if len(ficam) < len(ativ):
+        log(f"Strava: {len(ativ) - len(ficam)} atividades duplicadas removidas.")
+    return sorted(ficam, key=lambda a: a["date"], reverse=True)
+
+
 def buscar_strava(tokens, cfg):
     antigas = json.loads(ARQ_ATIV.read_text()) if ARQ_ATIV.exists() else []
     por_id = {a["id"]: a for a in antigas}
@@ -118,7 +135,7 @@ def buscar_strava(tokens, cfg):
                 por_id[n["id"]] = n
                 novas += 1
         pagina += 1
-    ativ = sorted(por_id.values(), key=lambda a: a["date"], reverse=True)
+    ativ = deduplicar(sorted(por_id.values(), key=lambda a: a["date"], reverse=True))
     ARQ_ATIV.write_text(json.dumps(ativ, ensure_ascii=False))
     log(f"Strava: {novas} atividades recebidas, {len(ativ)} no histórico.")
     return ativ

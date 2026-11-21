@@ -8,7 +8,28 @@
     "ritmo_limiar_corrida": "4:45",
     "css_100m": "2:30"
   },
-  "provas": [],
+  "provas": [
+    {
+      "nome": "IRONMAN 70.3 Rio de Janeiro",
+      "data": "2026-08-09",
+      "categoria": "tri",
+      "local": "Rio de Janeiro, RJ",
+      "destaque": "M35-39",
+      "distancias": {
+        "natacao": 1.9,
+        "bike": 90,
+        "corrida": 21.1
+      },
+      "oficial": {
+        "natacao": "",
+        "t1": "",
+        "bike": "",
+        "t2": "",
+        "corrida": "",
+        "total": "6:26:31"
+      }
+    }
+  ],
   "proximas": [
     {
       "nome": "IRONMAN 70.3 Brasília",
