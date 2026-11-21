@@ -71,6 +71,19 @@
         "bike": "343º geral",
         "corrida": "204º geral"
       }
+    },
+    {
+      "nome": "21K · Maratona do Rio 2025",
+      "data": "2025-06-21",
+      "categoria": "run",
+      "local": "Rio de Janeiro, RJ",
+      "destaque": "21,1 km · 5.764º geral · recorde pessoal na meia",
+      "distancias": {
+        "corrida": 21.1
+      },
+      "oficial": {
+        "total": "2:01:52"
+      }
     }
   ],
   "proximas": [
