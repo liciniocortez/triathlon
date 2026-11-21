@@ -45,7 +45,10 @@ a{color:inherit}
 .nav a:hover{color:var(--ink)}
 /* hero */
 .hero{padding:96px 0 72px;border-bottom:1px solid var(--line);position:relative;overflow:hidden}
-.hero:before{content:"";position:absolute;inset:0;background:radial-gradient(900px 420px at 85% 10%,rgba(74,121,181,.22),transparent 60%);pointer-events:none}
+.hero{background:var(--bg) url(img/chegada.jpg) right center/auto 100% no-repeat}
+.hero:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--bg) 46%,rgba(11,23,48,.85) 56%,rgba(11,23,48,.25) 72%,rgba(11,23,48,.05) 88%,rgba(11,23,48,.3)),linear-gradient(0deg,var(--bg) 0%,rgba(11,23,48,.6) 22%,rgba(11,23,48,0) 45%),linear-gradient(180deg,var(--bg) 0%,rgba(11,23,48,0) 12%);pointer-events:none}
+.hero .wrap{position:relative;z-index:1}
+.foto-legenda{position:absolute;right:28px;bottom:18px;z-index:1;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);opacity:.8}
 .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent-2)}
 .hero h1{font-family:var(--serif);font-weight:400;font-size:clamp(52px,9vw,112px);line-height:.95;letter-spacing:-.01em;margin:18px 0 22px}
 .hero h1 i{color:var(--accent-2)}
@@ -169,6 +172,9 @@ svg text{font-family:var(--mono);font-size:10px;fill:var(--ink-3)}
 footer{padding:48px 0 64px;color:var(--ink-3);font-family:var(--mono);font-size:11px;letter-spacing:.06em}
 footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
 @media (max-width:900px){
+  .hero{background-size:100% auto;background-position:center top;padding-top:350px}
+  .hero:before{background:linear-gradient(180deg,rgba(11,23,48,0) 0,rgba(11,23,48,0) 200px,var(--bg) 360px)}
+  .foto-legenda{display:none}
   .nav{display:none}
   .hero-kpis{grid-template-columns:1fr 1fr}
   .hero-kpis>div:nth-child(3){border-left:none;padding-left:0}
@@ -206,7 +212,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
     <span class="chip">Strava</span><span class="chip">Garmin</span><span class="chip">Whoop</span><span class="chip">TrainingPeaks</span><span class="chip">Carga · modelo PMC</span>
   </div>
   <div class="hero-kpis" id="heroKpis"></div>
-</div></section>
+</div><div class="foto-legenda">IRONMAN 70.3 Rio de Janeiro · chegada</div></section>
 
 <!-- 01 PREFÁCIO -->
 <section class="s" id="prefacio"><div class="wrap">

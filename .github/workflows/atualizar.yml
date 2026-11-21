@@ -57,6 +57,7 @@ jobs:
         run: |
           mkdir _site
           cp index.html conectar.html _site/
+          cp -r img _site/img
           cp -r data _site/data
           rm -f _site/data/atividades.json
 
