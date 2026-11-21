@@ -247,25 +247,28 @@ def buscar_garmin(tokens, cfg):
 
 
 # ------------------------------------------------------------------ TrainingPeaks (.ics)
-def tipo_por_texto(txt):
-    t = txt.lower()
-    for chaves, tipo in ((("swim", "nata", "nado", "piscina", "águas", "aguas"), "swim"),
-                         (("bike", "ride", "pedal", "cicl", "rolo", "brick"), "bike"),
-                         (("run", "corr", "trote", "longão", "longao"), "run"),
-                         (("strength", "força", "forca", "academia", "muscul", "funcional"), "str")):
-        if any(c in t for c in chaves):
-            return tipo
-    return None
+TIPOS_TP = {"swim": "swim", "bike": "bike", "run": "run", "strength": "str", "mtb": "bike", "brick": "bike",
+            "natação": "swim", "bicicleta": "bike", "corrida": "run", "força": "str"}
 
 
-def duracao_min(txt):
-    m = re.search(r"(?:planned|planejad|dura)[^0-9]{0,20}(\d{1,2}):(\d{2})(?::(\d{2}))?", txt, re.I) \
-        or re.search(r"\b(\d{1,2}):(\d{2}):(\d{2})\b", txt)
+def tipo_tp(titulo, desc):
+    """TrainingPeaks: 'Workout type: Bike' na descrição ou 'Bike: ...' no título."""
+    m = re.search(r"Workout type:\s*([^\n]+)", desc, re.I)
+    bruto = (m.group(1) if m else titulo.split(":", 1)[0]).strip().lower()
+    return TIPOS_TP.get(bruto)  # Day Off, Other, Custom etc. ficam de fora
+
+
+def planejado(desc):
+    """Minutos e km planejados. Sem 'Planned' = treino avulso já feito (o realizado vem do Strava)."""
+    mins = km = None
+    m = re.search(r"Planned Time:\s*(\d+):(\d{2})(?::(\d{2}))?", desc, re.I)
     if m:
-        h, mi = int(m.group(1)), int(m.group(2))
-        return h * 60 + mi
-    m = re.search(r"(\d{2,3})\s*min", txt, re.I)
-    return int(m.group(1)) if m else None
+        mins = int(m.group(1)) * 60 + int(m.group(2))
+    m = re.search(r"Distance Planned:\s*([\d.,]+)\s*(km|m)\b", desc, re.I)
+    if m:
+        v = float(m.group(1).replace(",", "."))
+        km = v if m.group(2).lower() == "km" else v / 1000
+    return mins, km
 
 
 def ler_ics(texto):
@@ -304,15 +307,16 @@ def buscar_tp():
         if not (HOJE - timedelta(days=6) <= d <= HOJE + timedelta(days=15)):
             continue
         titulo, desc = e.get("SUMMARY", "Treino"), e.get("DESCRIPTION", "")
-        tipo = tipo_por_texto(titulo) or tipo_por_texto(desc)
+        tipo = tipo_tp(titulo, desc)
         if not tipo:
-            continue  # eventos que não são treino (provas, notas)
-        mins = duracao_min(desc) or duracao_min(titulo)
-        if not mins and len(e.get("DTEND", "")) > 8 and len(e["DTSTART"]) > 8:
-            a = datetime.strptime(e["DTSTART"][:15], "%Y%m%dT%H%M%S")
-            b = datetime.strptime(e["DTEND"][:15], "%Y%m%dT%H%M%S")
-            mins = int((b - a).total_seconds() / 60) or None
-        plano.append({"date": d.isoformat(), "type": tipo, "name": titulo, "min": mins, "desc": desc[:400]})
+            continue
+        mins, km = planejado(desc)
+        if mins is None and km is None and re.search(r"Actual (Time|Distance)", desc, re.I):
+            continue
+        nome = titulo.split(":", 1)[1].strip() if ":" in titulo else titulo
+        texto = re.sub(r"^Workout type:[^\n]*\n?", "", desc).split("PSE - ")[0].strip()
+        plano.append({"date": d.isoformat(), "type": tipo, "name": nome, "min": mins,
+                      "km": round(km, 2) if km else None, "desc": texto[:500]})
     plano.sort(key=lambda p: p["date"])
     log(f"TrainingPeaks: {len(plano)} treinos planejados.")
     return plano
