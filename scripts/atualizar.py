@@ -130,6 +130,7 @@ WHOOP_API = "https://api.prod.whoop.com/developer/v2"
 
 def whoop_token(tokens):
     t = tokens["whoop"]
+    log(f"Whoop: refresh salvo={'sim' if t.get('refresh_token') else 'NÃO'} ({len(t.get('refresh_token') or '')} caracteres)")
     if t.get("expires_at", 0) > time.time() + 120:
         return t["access_token"]
     novo = post_token(WHOOP_TOKEN_URL, {

@@ -31,7 +31,9 @@ def whoop(codigo):
         "client_id": env("WHOOP_CLIENT_ID"), "client_secret": env("WHOOP_CLIENT_SECRET"),
         "code": codigo, "grant_type": "authorization_code", "redirect_uri": redirect_uri(),
     })
-    if "refresh_token" not in t:
+    print(f"Whoop respondeu: campos={sorted(t.keys())} escopos='{t.get('scope')}' "
+          f"refresh={'sim' if t.get('refresh_token') else 'NÃO'} expira_em={t.get('expires_in')}")
+    if not t.get("refresh_token"):
         raise SystemExit("O Whoop não devolveu refresh_token. Confira se o app tem o escopo 'offline' e autorize de novo.")
     return {"refresh_token": t["refresh_token"], "access_token": t["access_token"],
             "expires_at": int(time.time()) + int(t.get("expires_in", 3600))}, ""
