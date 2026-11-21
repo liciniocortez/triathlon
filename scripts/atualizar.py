@@ -237,11 +237,17 @@ def buscar_garmin(tokens, cfg):
     g = Garmin(env("GARMIN_EMAIL"), env("GARMIN_PASSWORD"))
     g.login()
     out = {}
-    try:
-        mm = g.get_max_metrics(HOJE.isoformat())
-    except Exception as e:
-        avisos.append(f"Garmin VO2máx: {e}")
-        mm = {}
+    mm = {}
+    for k in range(0, 30):  # o VO2máx só é registrado em dias com corrida/pedal ao ar livre
+        try:
+            mm = g.get_max_metrics((HOJE - timedelta(days=k)).isoformat())
+        except Exception as e:
+            avisos.append(f"Garmin VO2máx: {e}")
+            break
+        if procurar(mm, "vo2MaxPreciseValue") or procurar(mm, "vo2MaxValue"):
+            break
+    if not (procurar(mm, "vo2MaxPreciseValue") or procurar(mm, "vo2MaxValue")):
+        log(f"Garmin: VO2máx não encontrado nos últimos 30 dias (amostra: {str(mm)[:200]})")
     gen = procurar(mm, "generic")
     cyc = procurar(mm, "cycling")
     if gen:
