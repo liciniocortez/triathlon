@@ -149,7 +149,8 @@ def whoop_lista(token, caminho, dias):
         if prox:
             params["nextToken"] = prox
         r = requests.get(f"{WHOOP_API}{caminho}", headers={"Authorization": f"Bearer {token}"}, params=params, timeout=30)
-        r.raise_for_status()
+        if r.status_code >= 400:
+            raise RuntimeError(f"Whoop {caminho}: {r.status_code} {r.text[:300]}")
         j = r.json()
         itens += j.get("records", [])
         prox = j.get("next_token")
@@ -165,7 +166,10 @@ def data_local(iso, offset="-03:00"):
 
 
 def buscar_whoop(tokens):
+    tokens["whoop"]["expires_at"] = 0  # sempre renova: garante token válido e com escopos atuais
     token = whoop_token(tokens)
+    perfil = requests.get(f"{WHOOP_API}/user/profile/basic", headers={"Authorization": f"Bearer {token}"}, timeout=30)
+    log(f"Whoop perfil: {perfil.status_code} {perfil.text[:120] if perfil.status_code != 200 else 'ok'}")
     dias = 45
     sonos = {s["id"]: s for s in whoop_lista(token, "/activity/sleep", dias) if not s.get("nap")}
     ciclos = whoop_lista(token, "/cycle", dias)
