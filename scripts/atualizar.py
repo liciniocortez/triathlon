@@ -270,7 +270,15 @@ def buscar_garmin(tokens, cfg):
                 out["wkg"] = round(ftp / (peso / 1000 if peso > 300 else peso), 1)
     except Exception as e:
         avisos.append(f"Garmin limiar: {e}")
-    log(f"Garmin: {out}")
+    try:
+        prs = g.get_personal_record() or []
+        out["prs"] = [{k: r.get(k) for k in ("typeId", "value", "activityId", "activityName", "activityType",
+                                                "prStartTimeGmtFormatted", "actStartDateTimeInGMTFormatted")}
+                      for r in prs]
+        log(f"Garmin recordes: {json.dumps(out['prs'], ensure_ascii=False)[:3000]}")
+    except Exception as e:
+        avisos.append(f"Garmin recordes: {e}")
+    log(f"Garmin: { {k: v for k, v in out.items() if k != 'prs'} }")
     return out
 
 
