@@ -46,6 +46,31 @@
       "oficial": {
         "total": "1:47:38"
       }
+    },
+    {
+      "nome": "Triathlon Olímpico Guarujá",
+      "data": "2026-06-21",
+      "categoria": "tri",
+      "local": "Guarujá, SP",
+      "destaque": "M35-39 · 37º de 49 na categoria · 326º no geral",
+      "distancias": {
+        "natacao": 1.5,
+        "bike": 40,
+        "corrida": 10
+      },
+      "oficial": {
+        "natacao": "44:19",
+        "t1": "4:37",
+        "bike": "1:28:28",
+        "t2": "3:35",
+        "corrida": "51:03",
+        "total": "3:12:04"
+      },
+      "classificacao": {
+        "natacao": "349º geral",
+        "bike": "343º geral",
+        "corrida": "204º geral"
+      }
     }
   ],
   "proximas": [
