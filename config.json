@@ -14,19 +14,24 @@
       "data": "2026-08-09",
       "categoria": "tri",
       "local": "Rio de Janeiro, RJ",
-      "destaque": "M35-39",
+      "destaque": "M35-39 · 191º de 248 na categoria · 949º de 1.331 no geral",
       "distancias": {
         "natacao": 1.9,
         "bike": 90,
         "corrida": 21.1
       },
       "oficial": {
-        "natacao": "",
-        "t1": "",
-        "bike": "",
-        "t2": "",
-        "corrida": "",
+        "natacao": "36:21",
+        "t1": "10:24",
+        "bike": "3:20:51",
+        "t2": "4:57",
+        "corrida": "2:14:00",
         "total": "6:26:31"
+      },
+      "classificacao": {
+        "natacao": "74º M35-39",
+        "bike": "211º M35-39",
+        "corrida": "182º M35-39"
       }
     }
   ],

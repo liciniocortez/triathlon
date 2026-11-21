@@ -664,7 +664,7 @@ function renderRaces(){
     const col={swim:'var(--swim)',bike:'var(--bike)',run:'var(--run)',t1:'var(--str)',t2:'var(--str)'};
     body=`${tot>1?`<div class="splitbar">${parts.map(p=>`<div style="flex:${toS(p[2][1])/tot};background:${col[p[0]]}"></div>`).join('')}</div>`:'<div style="height:26px"></div>'}
     <div class="k-lbl">Parciais oficiais</div>
-    <div class="splits">${parts.map(p=>`<div><div class="lb"><i style="background:${col[p[0]]}"></i>${p[1]}${p[2][0]?' '+fmtN(p[2][0],p[2][0]<2?1:0)+'k':''}</div><div class="v">${p[2][1]||'—'}</div></div>`).join('')}
+    <div class="splits">${parts.map(p=>`<div><div class="lb"><i style="background:${col[p[0]]}"></i>${p[1]}${p[2][0]?' '+fmtN(p[2][0],p[2][0]<2?1:0)+'k':''}</div><div class="v">${p[2][1]||'—'}</div>${(r.ranks||{})[{swim:'natacao',bike:'bike',run:'corrida'}[p[0]]]?`<div class="ad" style="margin-top:2px">${r.ranks[{swim:'natacao',bike:'bike',run:'corrida'}[p[0]]]}</div>`:''}</div>`).join('')}
       <div><div class="lb">Total</div><div class="v" style="color:var(--accent-2)">${r.total}</div></div></div>`;
   } else {
     body=`<div class="splitbar"><div style="flex:1;background:var(--run)"></div></div><div class="splits" style="grid-template-columns:repeat(2,1fr)"><div><div class="lb">Distância</div><div class="v">${fmtN(r.run[0],1)} km</div></div><div><div class="lb">Tempo oficial</div><div class="v" style="color:var(--accent-2)">${r.total}</div></div></div>`;

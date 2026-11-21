@@ -432,7 +432,8 @@ def montar_provas(ativ, cfg):
         dist = p.get("distancias", {})
         of = p.get("oficial", {})
         item = {"cat": p.get("categoria", "tri"), "name": p["nome"], "place": p.get("local", ""),
-                "date": f"{MESES[d.month - 1]} {d.year}", "tag": p.get("destaque", ""), "total": of.get("total", "")}
+                "date": f"{MESES[d.month - 1]} {d.year}", "tag": p.get("destaque", ""), "total": of.get("total", ""),
+                "ranks": p.get("classificacao", {})}
         if item["cat"] == "tri":
             item["splits"] = {"swim": [dist.get("natacao", 0), of.get("natacao", "")], "t1": of.get("t1", ""),
                               "bike": [dist.get("bike", 0), of.get("bike", "")], "t2": of.get("t2", ""),
