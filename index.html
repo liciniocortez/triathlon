@@ -439,6 +439,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
 <script>
 /* ============ DADOS DE EXEMPLO (substituídos pelo data.json gerado diariamente) ============ */
 let TODAY = new Date('2026-11-21T09:00:00-03:00');
+let RACES=[];
 let IS_SAMPLE=true, PLANLIST=null, GARMIN=null, UPDATED=null, PROJ=null, ZONES=null, EFF=null, GEAR=null, WHOOP_ALL=null;
 let NEXT=[{nome:"IRONMAN 70.3 Brasília",data:"2027-04-18",local:"Brasília, DF",tipo:"tri",distancias:"1,9 km · 90 km · 21,1 km",meta:"sub-6:00"},
  {nome:"Maratona do Rio",data:"2027-05-30",local:"Rio de Janeiro, RJ",tipo:"run",distancias:"42,195 km",meta:""},
@@ -590,7 +591,7 @@ if(!IS_SAMPLE){ $('#footNote').textContent='Dados: Strava · Garmin · Whoop · 
   if(html) $('#prList').innerHTML=html; else $('#recordes').style.display='none';
 }
 /* ============ 02 PROVAS ============ */
-let RACES = [
+if(IS_SAMPLE) RACES = [
   {cat:'tri', name:'IRONMAN 70.3', place:'Exemplo · prova-alvo 2026', date:'AGO 2026', tag:'1ª 70.3 · faixa etária', splits:{swim:[1.9,'38:12'],t1:'4:05',bike:[90,'2:41:30'],t2:'2:48',run:[21.1,'1:52:40']}, total:'5:19:15', watch:{pace:'5:20',hr:156,max:174}},
   {cat:'tri', name:'Triathlon Olímpico', place:'Exemplo', date:'MAI 2026', tag:'Distância olímpica', splits:{swim:[1.5,'29:40'],t1:'2:55',bike:[40,'1:12:18'],t2:'1:50',run:[10,'48:22']}, total:'2:35:05', watch:{pace:'4:50',hr:162,max:179}},
   {cat:'tri', name:'Triathlon Sprint', place:'Exemplo', date:'NOV 2025', tag:'Primeira prova', splits:{swim:[.75,'16:10'],t1:'2:30',bike:[20,'38:44'],t2:'1:35',run:[5,'25:08']}, total:'1:24:07', watch:{pace:'5:01',hr:165,max:181}},
@@ -620,7 +621,7 @@ function renderRaces(){
   $('#raceDetail').innerHTML=`<div class="rd-date">${r.date} · ${r.place}</div><div class="rd-name">${r.name}</div><div class="rd-tag">${r.tag}</div>${body}
     <div class="k-lbl" style="margin-top:26px">Corrida · do relógio</div>
     <div class="watch"><div><div class="v">${r.watch.pace}</div><div class="ad">ritmo médio /km</div></div><div><div class="v">${r.watch.hr}</div><div class="ad">FC média</div></div><div><div class="v">${r.watch.max}</div><div class="ad">FC máx</div></div></div>
-    <div class="note">Ver no Strava →</div>`;
+    ${r.watch&&r.watch.id?`<div class="note"><a href="https://www.strava.com/activities/${r.watch.id}" style="color:var(--accent-2)">Ver corrida no Strava →</a></div>`:''}`;
 }
 tabs($('#raceTabs'),['Triathlon','Corrida'],i=>{raceCat=['tri','run'][i];raceSel=0;renderRaces();});
 renderRaces();

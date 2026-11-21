@@ -80,7 +80,7 @@ if (q.get('code')) {
     const id = document.getElementById('sid').value.trim(); if (!id) return;
     location.href = 'https://www.strava.com/oauth/authorize?' + new URLSearchParams({
       client_id: id, response_type: 'code', redirect_uri: base, approval_prompt: 'force',
-      scope: 'read,activity:read_all', state: 'strava-conectar' });
+      scope: 'read,activity:read_all,profile:read_all', state: 'strava-conectar' });
   };
   document.getElementById('wb').onclick = () => {
     const id = document.getElementById('wid').value.trim(); if (!id) return;
