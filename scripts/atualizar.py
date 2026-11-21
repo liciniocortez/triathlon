@@ -175,30 +175,34 @@ def buscar_whoop(tokens):
     sonos = {s["id"]: s for s in whoop_lista(token, "/activity/sleep", dias) if not s.get("nap")}
     ciclos = whoop_lista(token, "/cycle", dias)
     recs = whoop_lista(token, "/recovery", dias)
+    por_ciclo = {c["id"]: c for c in ciclos}
     por_dia = {}
-    for s in sonos.values():
-        sc = (s.get("score") or {}).get("stage_summary") or {}
-        if not sc:
-            continue
-        horas = (sc.get("total_in_bed_time_milli", 0) - sc.get("total_awake_time_milli", 0)) / 3.6e6
-        d = data_local(s["end"], s.get("timezone_offset") or "-03:00")
-        por_dia.setdefault(d, {})["sleep"] = round(horas, 1)
     for r in recs:
         sc = r.get("score") or {}
         if r.get("score_state") != "SCORED" or not sc:
             continue
         s = sonos.get(r.get("sleep_id"))
-        d = data_local(s["end"], s.get("timezone_offset") or "-03:00") if s else data_local(r["created_at"])
-        por_dia.setdefault(d, {}).update({
-            "rec": round(sc["recovery_score"]), "hrv": round(sc["hrv_rmssd_milli"]), "rhr": round(sc["resting_heart_rate"]),
-        })
-    for c in ciclos:
-        sc = c.get("score") or {}
-        if sc.get("strain") is None:
-            continue
-        d = data_local(c["start"], c.get("timezone_offset") or "-03:00")
-        por_dia.setdefault(d, {})["strain"] = round(sc["strain"], 1)
-    saida = [{"date": d, **v} for d, v in sorted(por_dia.items()) if "rec" in v][-30:]
+        c = por_ciclo.get(r.get("cycle_id")) or {}
+        # o dia de um registro Whoop é o dia em que você acorda
+        if s:
+            d = data_local(s["end"], s.get("timezone_offset") or "-03:00")
+        elif c.get("end"):
+            d = data_local(c["start"], c.get("timezone_offset") or "-03:00")
+        else:
+            d = data_local(r["created_at"])
+        item = {"rec": round(sc["recovery_score"]), "hrv": round(sc["hrv_rmssd_milli"]), "rhr": round(sc["resting_heart_rate"])}
+        ss = ((s or {}).get("score") or {}).get("stage_summary") or {}
+        if ss:
+            item["sleep"] = round((ss.get("total_in_bed_time_milli", 0) - ss.get("total_awake_time_milli", 0)) / 3.6e6, 1)
+        strain = (c.get("score") or {}).get("strain")
+        if strain is not None:
+            item["strain"] = round(strain, 1)
+        por_dia[d] = item
+    if recs:
+        r0 = recs[0]
+        log(f"Whoop: recuperação mais recente criada em {r0.get('created_at')} · estado {r0.get('score_state')} · "
+            f"{len(recs)} recuperações, {len(sonos)} sonos, {len(ciclos)} ciclos")
+    saida = [{"date": d, **v} for d, v in sorted(por_dia.items())][-30:]
     for x in saida:
         x.setdefault("sleep", 0)
         x.setdefault("strain", 0)
